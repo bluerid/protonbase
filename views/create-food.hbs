@@ -1,0 +1,25 @@
+<h1 id="bigOne">{{title}}</h1>
+<p>Welcome to {{title}}</p>
+<script src="https://www.gstatic.com/firebasejs/3.2.1/firebase.js"></script>
+<script type="text/javascript">
+
+  var config = {
+      apiKey: "AIzaSyDIu-9CjiVk0bDky5Nl7I_ggYyG_5FB7Nc",
+      authDomain: "proton-bc053.firebaseapp.com",
+      databaseURL: "https://proton-bc053.firebaseio.com",
+      storageBucket: "proton-bc053.appspot.com",
+  };
+  var app = firebase.initializeApp(config);
+  var auth = app.auth();
+
+  function writeUserData(uid, name, email, photoURL) {
+    var AuthData = {};
+    AuthData = {
+      uid: uid,
+      displayName: name,
+      email: email,
+      photoURL : photoURL,
+      isAuthor : true
+    };
+    firebase.database().ref('foods/' + uid).set(AuthData);
+  }

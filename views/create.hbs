@@ -1,0 +1,148 @@
+
+<script src="https://www.gstatic.com/firebasejs/3.2.1/firebase.js"></script>
+<script type="text/javascript">
+
+  var config = {
+      apiKey: "AIzaSyDIu-9CjiVk0bDky5Nl7I_ggYyG_5FB7Nc",
+      authDomain: "proton-bc053.firebaseapp.com",
+      databaseURL: "https://proton-bc053.firebaseio.com",
+      storageBucket: "proton-bc053.appspot.com",
+  };
+  var app = firebase.initializeApp(config);
+  var auth = app.auth();
+
+  function writeUserData(uid, name, email, photoURL) {
+    var AuthData = {};
+    AuthData = {
+      uid: uid,
+      displayName: name,
+      email: email,
+      photoURL : photoURL,
+      isAuthor : true
+    };
+    firebase.database().ref('users/' + uid).set(AuthData);
+  }
+
+  function handleSignUp() {
+    var email = document.getElementById('email').value;
+    var password = document.getElementById('password').value;
+    var author_last_name = document.getElementById('author_last_name').value;
+    var author_first_name = document.getElementById('author_first_name').value;
+
+    if (email.length < 4) {
+      alert('Please enter an email address.');
+      return;
+    }
+    if (author_first_name.length < 4) {
+      alert('Please enter author first name.');
+      return;
+    }
+    if (author_last_name.length < 4) {
+      alert('Please enter author last name.');
+      return;
+    }
+    if (password.length < 4) {
+      alert('Please enter a password.');
+      return;
+    }
+
+    firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(function(){
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          var displayName = user.displayName;
+          var email = user.email;
+          var emailVerified = user.emailVerified;
+          var photoURL = user.photoURL;
+          var isAnonymous = user.isAnonymous;
+          var uid = user.uid;
+          var refreshToken = user.refreshToken;
+          var providerData = user.providerData;
+
+          writeUserData(uid, author_first_name + ' ' + author_last_name, email, photoURL);
+
+          document.getElementById('quickstart-sign-up').textContent = 'New Author Added';
+          document.getElementById('quickstart-account-details').textContent = JSON.stringify({
+            displayName: displayName,
+            email: email,
+            emailVerified: emailVerified,
+            photoURL: photoURL,
+            isAnonymous: isAnonymous,
+            uid: uid,
+            refreshToken: refreshToken,
+            providerData: providerData
+          }, null, '  ');
+
+          user.updateProfile({
+            displayName: "Jane Q. User",
+            photoURL: "https://example.com/jane-q-user/profile.jpg"
+          }).then(function() {
+            firebase.auth().signOut();
+          });          
+        } else {
+          document.getElementById('quickstart-sign-up').textContent = 'Create Author';
+          //document.getElementById('quickstart-account-details').textContent = 'null';
+        }
+      });
+    })
+    .catch(function(error) {
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      if (errorCode == 'auth/weak-password') {
+        alert('The password is too weak.');
+      } else {
+        alert(errorMessage);
+      }
+      console.log(error);
+    });
+  }
+  
+  function initApp() {    
+      document.getElementById('quickstart-sign-up').addEventListener('click', handleSignUp, false);
+  }
+  window.onload = function() {
+    initApp();
+  };
+</script>
+
+  <main class="main-area">
+    <div class="row">
+      <form class="form-horizontal">
+        <div class="form-group">
+          <p>Enter an email and password below and either sign in to an existing account or sign up</p>
+          <label class="col-sm-2 control-label" for="formGroupInputLarge">Author Email</label>
+          <div class="col-sm-10">
+            <input class="form-control" type="text" style="display:inline;width:auto;" id="email" name="email" placeholder="Email"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="formGroupInputLarge">Author Name</label>
+          <div class="col-sm-10">
+            <input class="form-control" style="display:inline;width:auto;" type="text" id="author_first_name" name="author_first_name" placeholder="First Name"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="formGroupInputLarge">Author Name</label>
+          <div class="col-sm-10">
+            <input class="form-control" style="display:inline;width:auto;" type="text" id="author_last_name" name="author_last_name" placeholder="Last Name"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="formGroupInputLarge">Password</label>
+          <div class="col-sm-10">
+            <input class="form-control" style="display:inline;width:auto;" type="password" id="password" name="password" placeholder="Password"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-12">
+            <button type="button" class="btn btn-primary" id="quickstart-sign-up" name="signup">Create Author</button>
+          </div>
+        </div>
+      </form>
+      <div class="quickstart-user-details-container alert alert-info">
+        Firebase sign-in status: <span id="quickstart-sign-in-status">Unknown</span>
+        <div>Firebase auth <code>currentUser</code> object value:</div>
+        <pre><code id="quickstart-account-details">null</code></pre>
+      </div>
+    </div>
+  </main>
